@@ -3,7 +3,15 @@ from sqlalchemy import create_engine
 from discord.user import User as DiscordUser
 from .models import User
 from .models.base import Base
+from enum import Enum
 import sqlite3
+
+class BalanceLocation(Enum):
+    BANK = "bank"
+    CASH = "cash"
+
+class NotEnoughBalance(Exception):
+    pass
 
 class Database:
     def __init__(self) -> None:
@@ -49,3 +57,29 @@ class Database:
 
         self.session.commit()
         return user
+    
+    def transfer_balance(
+            self,
+            user: User,
+            to: BalanceLocation,
+            amount: int
+        ) -> User:
+        if to == BalanceLocation.CASH:
+            if amount <= user.bank:
+                user.bank -= amount
+                user.cash += amount
+            else:
+                raise NotEnoughBalance()
+        elif to == BalanceLocation.BANK:
+            if amount <= user.cash:
+                user.cash -= amount
+                user.bank += amount
+            else:
+                raise NotEnoughBalance()
+        
+        self.session.commit()
+        return user
+
+    def get_account_from_enum(self, user: User, acc_type: BalanceLocation) -> int:
+        if acc_type == BalanceLocation.BANK: return user.bank
+        else: return user.cash

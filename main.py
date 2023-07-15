@@ -1,4 +1,4 @@
-from src.database import Database
+from src.database import Database, BalanceLocation, NotEnoughBalance
 from discord.ext import commands
 from dotenv import load_dotenv
 from charlogger import Logger
@@ -68,7 +68,7 @@ async def bot_(ctx):
     embed.add_field(name="Authors", value="chaarlottte/quickdaffy, refactoring/ren", inline=False)
     await ctx.send(embed=embed)
 
-@bot.command(name="balance")
+@bot.command(name="balance", aliases=["bal"])
 async def user_balance(ctx: Context):
     user = database.get_user(ctx.author._user)
     embed = discord.Embed(title="blahaj", color=embed_color)
@@ -102,5 +102,88 @@ async def collect_income(ctx: Context):
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
         embed.description = f"You can collect income again <t:{round((user.last_collected_income + income_delay) / 1000)}:R>."
         await ctx.send(embed=embed)
+
+@bot.command(name="deposit", aliases=["dep"])
+async def deposit_money(ctx: Context, amount: str):
+    user = database.get_user(ctx.author._user)
+
+    to_deposit = 0
+    match amount:
+        case "all":
+            to_deposit = user.cash
+        case "half":
+            to_deposit = int(user.cash / 2)
+        case _:
+            if amount.isnumeric():
+                to_deposit = int(amount)
+            else:
+                if amount.startswith("-"):
+                    embed = discord.Embed(title="blahaj",  color=embed_color)
+                    embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+                    embed.description = f"You can't deposit a negative number, silly!"
+                    await ctx.send(embed=embed)
+                    return
+                else:
+                    embed = discord.Embed(title="blahaj",  color=embed_color)
+                    embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+                    embed.description = f"You gotta provide a number to deposit!"
+                    await ctx.send(embed=embed)
+    try:
+        database.transfer_balance(
+            user=user,
+            to=BalanceLocation.BANK,
+            amount=to_deposit
+        )
+        embed = discord.Embed(title="blahaj",  color=embed_color)
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+        embed.description = f"Deposited {to_deposit} to your bank."
+        await ctx.send(embed=embed)
+    except NotEnoughBalance:
+        embed = discord.Embed(title="blahaj",  color=embed_color)
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+        embed.description = f"You don't have enough cash to deposit that amount!"
+        await ctx.send(embed=embed)
+
+@bot.command(name="withdraw", aliases=["with"])
+async def withdraw_money(ctx: Context, amount: str):
+    user = database.get_user(ctx.author._user)
+
+    to_withdraw = 0
+    match amount:
+        case "all":
+            to_withdraw = user.bank
+        case "half":
+            to_withdraw = int(user.bank / 2)
+        case _:
+            if amount.isnumeric():
+                to_withdraw = int(amount)
+            else:
+                if amount.startswith("-"):
+                    embed = discord.Embed(title="blahaj",  color=embed_color)
+                    embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+                    embed.description = f"You can't withdraw a negative number, silly!"
+                    await ctx.send(embed=embed)
+                    return
+                else:
+                    embed = discord.Embed(title="blahaj",  color=embed_color)
+                    embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+                    embed.description = f"You gotta provide a number to withdraw!"
+                    await ctx.send(embed=embed)
+    try:
+        database.transfer_balance(
+            user=user,
+            to=BalanceLocation.CASH,
+            amount=to_withdraw
+        )
+        embed = discord.Embed(title="blahaj",  color=embed_color)
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+        embed.description = f"Withdrew {to_withdraw} from your bank."
+        await ctx.send(embed=embed)
+    except NotEnoughBalance:
+        embed = discord.Embed(title="blahaj",  color=embed_color)
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+        embed.description = f"You don't have enough cash to withdraw that amount!"
+        await ctx.send(embed=embed)
+
 
 bot.run(bot_token)
