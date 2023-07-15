@@ -16,8 +16,7 @@ class Database:
     def add_user(self, discord_user: DiscordUser) -> User:
         user = User(
             id=discord_user.id,
-            discord_username=discord_user.name,
-            balance=0
+            discord_username=discord_user.name
         )
 
         self.session.add(user)
@@ -26,10 +25,27 @@ class Database:
 
     def get_user(self, discord_user: DiscordUser) -> User:
         try:
-            user = self.session.query(User).filter_by(User.id == discord_user.id).first()
+            user = self.session.query(User).filter(User.id == discord_user.id).first()
+            assert user != None
         except:
             self.session.rollback()
             user = self.add_user(discord_user)
+        return user
+    
+    def add_to_user_balance(
+            self, 
+            user: User, 
+            amount: int, 
+            direct_to_bank: bool = False,
+            last_collected_income: int = None
+        ) -> User:
+        if direct_to_bank:
+            user.bank += amount
+        else:
+            user.cash += amount
 
-        print(user)
+        if last_collected_income != None:
+            user.last_collected_income = last_collected_income
+
+        self.session.commit()
         return user

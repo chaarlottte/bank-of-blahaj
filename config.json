@@ -1,5 +1,6 @@
 {
     "prefix": "+",
     "admins": [1091404198077276160],
-    "database": "database.json"
+    "database": "database.json",
+    "income_delay_in_seconds": 60
 }
