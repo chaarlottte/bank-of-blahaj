@@ -8,3 +8,7 @@ plans:
 - ability for administrators to give economic participants fines or sanctions
 - ability for users to create their own shops
 - idk thats about it
+
+completed:
+- help command
+- actually working ping
