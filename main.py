@@ -42,6 +42,12 @@ embed_red = 0xed4245
 x_emoji = "<:x_:1129945309305393232>"
 check_emoji = "<:check:1129945323888984215>"
 
+database.create_item(
+    name="BLAHAJ",
+    description="OMG SHONK BLAHAJ I LOVE HIM SO MUCH I WOULD DIE FOR THIS FUCKING SHARK AAAAAAAAAAAAA",
+    price=500
+)
+
 # Events
 
 @bot.event
@@ -115,7 +121,7 @@ async def collect_income(ctx: Context):
     else:
         embed = discord.Embed(color=embed_red)
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
-        embed.description = f"{x_emoji} You can next collect income <t:{round((user.last_collected_income + income_delay) / 1000)}:R>."
+        embed.description = f"{x_emoji} You can collect income again <t:{round((user.last_collected_income + income_delay) / 1000)}:R>."
         await ctx.send(embed=embed)
 
 @bot.command(name="work")
@@ -178,7 +184,7 @@ async def work(ctx: Context):
     else:
         embed = discord.Embed(color=embed_red)
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
-        embed.description = f"{x_emoji} You can next work <t:{round((user.last_worked + work_delay) / 1000)}:R>."
+        embed.description = f"{x_emoji} You can work again <t:{round((user.last_worked + work_delay) / 1000)}:R>."
         await ctx.send(embed=embed)
 
 @bot.command(name="deposit", aliases=["dep"])
@@ -265,7 +271,6 @@ async def withdraw_money(ctx: Context, amount: str):
 
 @bot.command(name="pay", aliases=["send"])
 async def pay_user(ctx: Context, user: discord.User, amount: int, *, args = None):
-    print(user, amount, args)
     paying_user = database.get_user(ctx.author._user)
     to_pay = database.get_user(user)
 
@@ -289,5 +294,20 @@ async def pay_user(ctx: Context, user: discord.User, amount: int, *, args = None
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
         embed.description = f"{x_emoji} You don't have enough {currency_symbol} for that!"
         await ctx.send(embed=embed)
+
+@bot.command(name="shop", aliases=["store"])
+async def display_store(ctx: Context):
+    items = database.get_all_items()
+    embed = discord.Embed(title="blahaj store", color=embed_color)
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+
+    for item in items:
+        embed.add_field(
+            name=f"{currency_symbol} {item.price} - {item.name}",
+            value=f"{item.description}",
+            inline=False
+        )
+
+    await ctx.send(embed=embed)
 
 bot.run(bot_token)

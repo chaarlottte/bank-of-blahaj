@@ -1,7 +1,7 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from discord.user import User as DiscordUser
-from .models import User
+from .models import User, Item, user_item_association
 from .models.base import Base
 from enum import Enum
 import sqlite3
@@ -99,3 +99,58 @@ class Database:
     def get_account_from_enum(self, user: User, acc_type: BalanceLocation) -> int:
         if acc_type == BalanceLocation.BANK: return user.bank
         else: return user.cash
+
+    def get_all_items(self) -> list:
+        items = self.session.query(Item).all()
+        return items
+    
+    def create_item(self, name: str, description: str, price: int) -> Item:
+        item = Item(
+            name=name,
+            description=description,
+            price=price
+        )
+        self.session.add(item)
+        self.session.commit()
+        return item
+    
+    def get_user_items(self, user: User) -> list:
+        items = user.items
+        return items
+    
+    def add_item_to_user_inventory(self, user: User, item: Item, quantity: int = 1) -> User:
+        if item in user.items:
+            user_item = self.session.query(user_item_association).filter_by(
+                user_id=user.id, item_id=item.id
+            ).first()
+            user_item.quantity += quantity
+        else:
+            user.items.append(item)
+            user_item = self.session.query(user_item_association).filter_by(
+                user_id=user.id, item_id=item.id
+            ).first()
+            user_item.quantity = quantity
+
+        self.session.commit()
+        return user
+
+    def remove_item_from_user_inventory(self, user: User, item: Item, quantity: int = 1) -> User:
+        if item in user.items:
+            user_item = self.session.query(user_item_association).filter_by(
+                user_id=user.id, item_id=item.id
+            ).first()
+
+            if user_item.quantity <= quantity:
+                user.items.remove(item)
+                self.session.delete(user_item)
+            else:
+                user_item.quantity -= quantity
+
+            self.session.commit()
+        return user
+    
+    def create_user_item(self, user: User, name: str, description: str, price: int) -> Item:
+        item = Item(name=name, description=description, price=price, creator=user)
+        self.session.add(item)
+        self.session.commit()
+        return item

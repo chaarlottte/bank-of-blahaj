@@ -4,6 +4,6 @@
         1091404198077276160 
     ],
     "income_delay_in_seconds": 60,
-    "work_delay_in_seconds": 60,
-    "currency_symbol": "<:blahaj:1077444163768963076>"
+    "work_delay_in_seconds": 1,
+    "currency_symbol": "<:blahajcoin:1129976643063132230>"
 }
