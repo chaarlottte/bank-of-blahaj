@@ -42,11 +42,15 @@ embed_red = 0xed4245
 x_emoji = "<:x_:1129945309305393232>"
 check_emoji = "<:check:1129945323888984215>"
 
-database.create_item(
-    name="BLAHAJ",
-    description="OMG SHONK BLAHAJ I LOVE HIM SO MUCH I WOULD DIE FOR THIS FUCKING SHARK AAAAAAAAAAAAA",
-    price=500
-)
+________itms = database.get_all_items()
+
+should_make_blahaj = True
+for x in ________itms:
+    if x.name == "BLAHAJ":
+        should_make_blahaj = False
+
+if should_make_blahaj:
+    database.create_item(name="BLAHAJ", description="OMG SHONK BLAHAJ I LOVE HIM SO MUCH I WOULD DIE FOR THIS FUCKING SHARK AAAAAAAAAAAAA", price=500)
 
 # Events
 
@@ -302,12 +306,38 @@ async def display_store(ctx: Context):
     embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
 
     for item in items:
-        embed.add_field(
-            name=f"{currency_symbol} {item.price} - {item.name}",
-            value=f"{item.description}",
-            inline=False
-        )
+        if item.creator_user == None:
+            embed.add_field(
+                name=f"{currency_symbol} {item.price} - {item.name}",
+                value=f"{item.description}",
+                inline=False
+            )
+        else:
+            embed.add_field(
+                name=f"{currency_symbol} {item.price} - {item.name}",
+                value=f"{item.description} (sold by <@{item.creator_user.id}>)",
+                inline=False
+            )
 
+    await ctx.send(embed=embed)
+
+@bot.command(name="createitem")
+async def create_user_item(ctx: Context, item_name: str, item_price: int, *, item_description = "no description set"):
+    user = database.get_user(ctx.author._user)
+    item = database.create_user_item(
+        name=item_name,
+        description=item_description,
+        price=item_price,
+        user=user
+    )
+
+    embed = discord.Embed(color=embed_green)
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+    embed.description = f"{check_emoji} Created item!"
+    embed.add_field(name="Name:", value=item.name)
+    embed.add_field(name="Description:", value=item.description)
+    embed.add_field(name="Price:", value=f"{currency_symbol} {item.price}")
+    embed.add_field(name="Creator:", value=f"<@{item.creator_user.id}>")
     await ctx.send(embed=embed)
 
 bot.run(bot_token)
