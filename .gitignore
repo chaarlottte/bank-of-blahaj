@@ -2,3 +2,4 @@
 .venv/
 database.sqlite
 jobs.json
+*.pyc
