@@ -9,4 +9,9 @@ class User(Base):
     discord_username: Mapped[str] = mapped_column(String(30))
     cash: Mapped[int] = mapped_column(Integer(), default=0)
     bank: Mapped[int] = mapped_column(Integer(), default=0)
+
+    job_id: Mapped[int] = mapped_column(Integer(), default=0)
+    job_xp: Mapped[int] = mapped_column(Integer(), default=0)
+
     last_collected_income: Mapped[int] = mapped_column(Integer(), default=0)
+    last_worked: Mapped[int] = mapped_column(Integer(), default=0)

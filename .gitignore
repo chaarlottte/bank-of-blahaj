@@ -1,3 +1,4 @@
 .env
 .venv/
-database.json
+database.sqlite
+jobs.json

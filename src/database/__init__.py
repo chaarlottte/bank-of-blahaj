@@ -45,7 +45,8 @@ class Database:
             user: User, 
             amount: int, 
             direct_to_bank: bool = False,
-            last_collected_income: int = None
+            last_collected_income: int = None,
+            last_worked: int = None
         ) -> User:
         if direct_to_bank:
             user.bank += amount
@@ -54,6 +55,21 @@ class Database:
 
         if last_collected_income != None:
             user.last_collected_income = last_collected_income
+        
+        if last_worked != None:
+            user.last_worked = last_worked
+
+        self.session.commit()
+        return user
+    
+    def add_user_xp(
+            self,
+            user: User,
+            normal_xp: int = 0,
+            job_xp: int = 0
+        ) -> User:
+
+        user.job_xp += job_xp
 
         self.session.commit()
         return user

@@ -5,10 +5,17 @@ make a PR if you want to contribute 😸
 
 plans:
 - economy with commands like `work`, `collect`, `slut`, `crime`, and `rob`
+- leaderboards
 - ability for administrators to give economic participants fines or sanctions
 - ability for users to create their own shops
-- idk thats about it
+- hit system, a hit can be placed on a user and if they are robbed then the person who robbed them will be paid extra
 
 completed:
 - help command
 - actually working ping
+- collect command (every 12 hours once in prod)
+- job system + work
+- pay other users, see their balances
+
+notes:
+- jobs.json is private so i don't leak the progression, because it has some SERIOUS twists and turns and im going to turn it into a whole story dot dot dot....

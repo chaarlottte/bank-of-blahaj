@@ -1,0 +1,10 @@
+{
+    "jobs": [
+        {
+            "level": 0,
+            "name": "Discord Mod",
+            "income": 30,
+            "xp_to_progress": 30
+        }
+    ]
+}
