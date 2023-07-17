@@ -55,13 +55,35 @@ if should_make_blahaj:
 # Events
 
 @bot.event
-async def on_ready():
-    activity = discord.Game(name="with myself")
-    await bot.change_presence(status=discord.Status.dnd, activity=activity)
-    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
+async def on_reaction_add(reaction: discord.Reaction, user: discord.User):
+    message = reaction.message
+    emoji = reaction.emoji
+
+    if emoji.id == 1129976643063132230:
+        payer = database.get_user(
+            discord_user=user
+        )
+        payee = database.get_user(
+            message.author._user
+        )
+
+        payer_bank = payer.bank > payer.cash
+
+        payer = database.add_to_user_balance(
+            user=payer,
+            amount=-1,
+            direct_to_bank=payer_bank
+        )
+
+        payee = database.add_to_user_balance(
+            user=payee,
+            amount=1,
+            direct_to_bank=True
+        )
+
+        msg = await message.channel.send(f"<@{payer.id}> tipped <@{payee.id}> :)")
 
 # Commands
-
 @bot.command()
 async def ping(ctx):
     before = time.monotonic()
@@ -70,7 +92,6 @@ async def ping(ctx):
 
     embed = discord.Embed(title="pong!", description=f"Latency: **`{str(int(ping))}ms`**", color=embed_color)
     await message.edit(content=None, embed=embed)
-
 @bot.command(name="help")
 async def help(ctx):
     embed = discord.Embed(color=embed_color)
@@ -274,10 +295,19 @@ async def withdraw_money(ctx: Context, amount: str):
         await ctx.send(embed=embed)
 
 @bot.command(name="pay", aliases=["send"])
-async def pay_user(ctx: Context, user: discord.User, amount: int, *, args = None):
+async def pay_user(ctx: Context, user: discord.User, amnt_str: str, *, args = None):
     paying_user = database.get_user(ctx.author._user)
     to_pay = database.get_user(user)
 
+    match amnt_str:
+        case "all":
+            amount = paying_user.cash
+        case "half":
+            amount = int(paying_user.cash / 2)
+        case _:
+            if amnt_str.isnumeric():
+                amount = int(amnt_str)
+            
     if amount <= 0:
         embed = discord.Embed(color=embed_red)
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
