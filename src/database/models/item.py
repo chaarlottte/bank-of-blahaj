@@ -9,6 +9,6 @@ class Item(Base):
     name: Mapped[str] = mapped_column(String(100))
     description: Mapped[str] = mapped_column(String(1000))
     price: Mapped[int] = mapped_column(Integer)
-    creator_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
+    user_store_id: Mapped[int] = mapped_column(Integer, ForeignKey("user_stores.id"))
 
-    creator_user = relationship("User", backref="items_created")
+    user_store = relationship("UserStore", backref="store_items")

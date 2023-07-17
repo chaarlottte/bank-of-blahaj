@@ -1,4 +1,4 @@
-discord.py
+nextcord
 python-dotenv
 sqlalchemy
 charlogger

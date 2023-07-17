@@ -1,7 +1,7 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from discord.user import User as DiscordUser
-from .models import User, Item, user_item_association
+from nextcord.user import User as DiscordUser
+from .models import User, Item, UserStore, store_item_association
 from .models.base import Base
 from enum import Enum
 import sqlite3
@@ -120,14 +120,14 @@ class Database:
     
     def add_item_to_user_inventory(self, user: User, item: Item, quantity: int = 1) -> User:
         if item in user.items:
-            user_item = self.session.query(user_item_association).filter_by(
+            user_item = self.session.query(store_item_association).filter_by(
                 user_id=user.id, item_id=item.id
             ).first()
             user_item.quantity += quantity
         else:
             user.items.append(item)
-            user_item = self.session.query(user_item_association).filter_by(
-                user_id=user.id, item_id=item.id
+            user_item = self.session.query(store_item_association).filter_by(
+                store_id=user.store.id, item_id=item.id
             ).first()
             user_item.quantity = quantity
 
@@ -136,8 +136,8 @@ class Database:
 
     def remove_item_from_user_inventory(self, user: User, item: Item, quantity: int = 1) -> User:
         if item in user.items:
-            user_item = self.session.query(user_item_association).filter_by(
-                user_id=user.id, item_id=item.id
+            user_item = self.session.query(store_item_association).filter_by(
+                store_id=user.store.id, item_id=item.id
             ).first()
 
             if user_item.quantity <= quantity:
@@ -149,8 +149,26 @@ class Database:
             self.session.commit()
         return user
     
-    def create_user_item(self, user: User, name: str, description: str, price: int) -> Item:
-        item = Item(name=name, description=description, price=price, creator=user)
+    def create_store(self, user: User, store_name: str, store_description: str) -> UserStore:
+        store = UserStore(
+            user=user,
+            name=store_name,
+            description=store_description
+        )
+        self.session.add(store)
+        self.session.commit()
+        return store
+
+    def create_item_for_store(self, store: UserStore, name: str, description: str, price: int) -> Item:
+        item = Item(name=name, description=description, price=price, store=store)
         self.session.add(item)
         self.session.commit()
         return item
+
+    def get_all_stores(self) -> list:
+        stores = self.session.query(UserStore).all()
+        return stores
+
+    def get_items_in_store(self, store: UserStore) -> list:
+        items = store.items
+        return items
