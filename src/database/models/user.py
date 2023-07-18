@@ -24,6 +24,8 @@ class User(Base):
 
     last_collected_income: Mapped[int] = mapped_column(Integer(), default=0)
     last_worked: Mapped[int] = mapped_column(Integer(), default=0)
+    last_slutted: Mapped[int] = mapped_column(Integer(), default=0)
+    last_crimed: Mapped[int] = mapped_column(Integer(), default=0)
 
     items = relationship("Item", secondary=user_item_association, backref="users")
     created_items = relationship("Item", backref="creator")

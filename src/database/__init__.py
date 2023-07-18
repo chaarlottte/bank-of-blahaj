@@ -46,18 +46,19 @@ class Database:
             amount: int, 
             direct_to_bank: bool = False,
             last_collected_income: int = None,
-            last_worked: int = None
+            last_worked: int = None,
+            last_slutted: int = None,
+            last_crimed: int = None
         ) -> User:
         if direct_to_bank:
             user.bank += amount
         else:
             user.cash += amount
 
-        if last_collected_income != None:
-            user.last_collected_income = last_collected_income
-        
-        if last_worked != None:
-            user.last_worked = last_worked
+        if last_collected_income != None: user.last_collected_income = last_collected_income
+        if last_worked != None: user.last_worked = last_worked
+        if last_slutted != None: user.last_slutted = last_slutted
+        if last_crimed != None: user.last_crimed = last_crimed
 
         self.session.commit()
         return user

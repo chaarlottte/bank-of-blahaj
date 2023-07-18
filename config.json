@@ -3,7 +3,16 @@
     "admins": [ 
         1091404198077276160 
     ],
-    "income_delay_in_seconds": 60,
+    "income_delay_in_seconds": 1,
     "work_delay_in_seconds": 1,
-    "currency_symbol": "<:blahajcoin:1129976643063132230>"
+    "slut_delay_in_seconds": 1,
+    "crime_delay_in_seconds": 1,
+    "currency_symbol": "<:blahajcoin:1129976643063132230>",
+    "role_income": {
+        "1067877237162004501": 10000,
+        "1063135032849477752": 500,
+        "1128662009966235730": 5000,
+        "1128661966743949353": 1000,
+        "1072649264443961344": 100
+    }
 }

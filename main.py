@@ -22,6 +22,9 @@ currency_symbol: str = config.get("currency_symbol")
 admins: list = config.get("admins")
 income_delay_in_seconds: int = config.get("income_delay_in_seconds")
 work_delay_in_seconds: int = config.get("work_delay_in_seconds")
+slut_delay_in_seconds: int = config.get("slut_delay_in_seconds")
+crime_delay_in_seconds: int = config.get("crime_delay_in_seconds")
+role_income_list: dict = config.get("role_income")
 
 load_dotenv()
 bot_token: str = os.getenv("TOKEN")
@@ -92,6 +95,7 @@ async def ping(ctx):
 
     embed = discord.Embed(title="pong!", description=f"Latency: **`{str(int(ping))}ms`**", color=embed_color)
     await message.edit(content=None, embed=embed)
+
 @bot.command(name="help")
 async def help(ctx):
     embed = discord.Embed(color=embed_color)
@@ -131,7 +135,23 @@ async def collect_income(ctx: Context):
     income_delay = income_delay_in_seconds * 1000
 
     if now - user.last_collected_income >= income_delay:
-        amount = int(random.randrange(10, 50))
+        amount = 0
+        index = 1
+
+        embed = discord.Embed(color=embed_green)
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+        embed.description = f"{check_emoji} Role income successfully collected!\n\n"
+        
+        roles = ctx.author.roles
+        roles.reverse()
+        
+        for role in roles:
+            if role_income_list.get(str(role.id)) != None:
+                inc = role_income_list.get(str(role.id))
+                embed.description += f"`{index}` - <@&{role.id}> | {currency_symbol} {inc}\n"
+                index += 1
+                amount += inc
+
         user = database.add_to_user_balance(
             user,
             amount,
@@ -139,14 +159,99 @@ async def collect_income(ctx: Context):
             last_collected_income=now
         )
 
-        embed = discord.Embed(color=embed_green)
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
-        embed.description = f"{check_emoji} You collected {currency_symbol} {amount}. Your balance is now {currency_symbol} {user.bank + user.cash}"
         await ctx.send(embed=embed)
     else:
         embed = discord.Embed(color=embed_red)
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
         embed.description = f"{x_emoji} You can collect income again <t:{round((user.last_collected_income + income_delay) / 1000)}:R>."
+        await ctx.send(embed=embed)
+
+@bot.command(name="slut")
+async def slut_command(ctx: Context):
+    user = database.get_user(ctx.author._user)
+    now = round(time.time() * 1000)
+    slut_delay = slut_delay_in_seconds * 1000
+
+    if now - user.last_slutted >= slut_delay:
+        success = random.random() > 0.35 # 35% chance to fail slut
+        
+        if success:
+            payout = int(random.randrange(100, 600))
+
+            user = database.add_to_user_balance(
+                user,
+                payout,
+                direct_to_bank=False,
+                last_slutted=now
+            )
+                
+            embed = discord.Embed(color=embed_green)
+            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+            embed.description = f"{check_emoji} you :3'd for {currency_symbol} {payout}!! >:3"
+            await ctx.send(embed=embed)
+        else:
+            total_user_wealth = user.bank + user.cash
+            fine = int(total_user_wealth * 0.01) # get 1% of user wealth
+
+            user = database.add_to_user_balance(
+                user,
+                -fine,
+                direct_to_bank=False,
+                last_slutted=now
+            )
+                
+            embed = discord.Embed(color=embed_red)
+            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+            embed.description = f"{x_emoji} you :3'd too close to the sun and some asshole stole {currency_symbol} {fine} from you"
+            await ctx.send(embed=embed)
+    else:
+        embed = discord.Embed(color=embed_red)
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+        embed.description = f"{x_emoji} You can be a slut again <t:{round((user.last_slutted + slut_delay) / 1000)}:R>."
+        await ctx.send(embed=embed)
+
+@bot.command(name="crime")
+async def crime_command(ctx: Context):
+    user = database.get_user(ctx.author._user)
+    now = round(time.time() * 1000)
+    crime_delay = crime_delay_in_seconds * 1000
+
+    if now - user.last_crimed >= crime_delay:
+        success = random.random() > 0.4 # 35% chance to fail crime
+        
+        if success:
+            payout = int(random.randrange(250, 700))
+
+            user = database.add_to_user_balance(
+                user,
+                payout,
+                direct_to_bank=False,
+                last_crimed=now
+            )
+                
+            embed = discord.Embed(color=embed_green)
+            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+            embed.description = f"{check_emoji} You stole {currency_symbol} {payout} from some asshole billionaire."
+            await ctx.send(embed=embed)
+        else:
+            total_user_wealth = user.bank + user.cash
+            fine = int(total_user_wealth * random.choice([0.01, 0.02, 0.03, 0.04, 0.05])) # get 1%-5% of user wealth
+
+            user = database.add_to_user_balance(
+                user,
+                -fine,
+                direct_to_bank=False,
+                last_crimed=now
+            )
+                
+            embed = discord.Embed(color=embed_red)
+            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+            embed.description = f"The pigs caught you and you got fined {currency_symbol} {fine}."
+            await ctx.send(embed=embed)
+    else:
+        embed = discord.Embed(color=embed_red)
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+        embed.description = f"{x_emoji} You can commit a crime again <t:{round((user.last_crimed + crime_delay) / 1000)}:R>."
         await ctx.send(embed=embed)
 
 @bot.command(name="work")
