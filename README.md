@@ -17,6 +17,8 @@ completed:
 - job system + work
 - pay other users, see their balances
 - cutesy little tipping system :>
+- implemented role income system
+- slut and crime command
 
 notes:
 - jobs.json is private so i don't leak the progression, because it has some SERIOUS twists and turns and im going to turn it into a whole story dot dot dot....
