@@ -176,8 +176,7 @@ async def slut_command(ctx: Context):
         success = random.random() > 0.35 # 35% chance to fail slut
         
         if success:
-            payout = int(random.randrange(100, 600))
-
+            payout = random.randrange(100, 600)
             user = database.add_to_user_balance(
                 user,
                 payout,
@@ -192,7 +191,6 @@ async def slut_command(ctx: Context):
         else:
             total_user_wealth = user.bank + user.cash
             fine = int(total_user_wealth * 0.01) # get 1% of user wealth
-
             user = database.add_to_user_balance(
                 user,
                 -fine,
@@ -220,8 +218,7 @@ async def crime_command(ctx: Context):
         success = random.random() > 0.4 # 35% chance to fail crime
         
         if success:
-            payout = int(random.randrange(250, 700))
-
+            payout = random.randrange(250, 700)
             user = database.add_to_user_balance(
                 user,
                 payout,
@@ -236,7 +233,6 @@ async def crime_command(ctx: Context):
         else:
             total_user_wealth = user.bank + user.cash
             fine = int(total_user_wealth * random.choice([0.01, 0.02, 0.03, 0.04, 0.05])) # get 1%-5% of user wealth
-
             user = database.add_to_user_balance(
                 user,
                 -fine,
