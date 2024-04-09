@@ -63,6 +63,15 @@ class Database:
         self.session.commit()
         return user
     
+    def deduct_user_balance(
+            self,
+            user: User,
+            amount: int
+    ):
+        user.cash -= amount
+        self.session.commit()
+        return user
+    
     def add_user_xp(
             self,
             user: User,
