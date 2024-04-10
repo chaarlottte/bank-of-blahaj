@@ -281,7 +281,7 @@ async def rob_command(ctx: Context, member: discord.Member):
 
                     embed = discord.Embed(title="Success!", color=embed_green)
                     embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
-                    embed.description = f"{check_emoji} Wow! You just robbed <@{member._user.id}> blind! Hope you're happy..."
+                    embed.description = f"{check_emoji} Wow! You just robbed <@{member._user.id}> blind and got {currency_symbol} {payout}! Hope you're happy..."
                     await ctx.send(embed)
             else:
                 fine = random.randint(1, round(user.cash * 0.20)) # Fine is 1$ to 20% of the users cash
@@ -290,7 +290,7 @@ async def rob_command(ctx: Context, member: discord.Member):
 
                 embed = discord.Embed(title="Oh great heavens!", color=embed_red)
                 embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
-                embed.description = f"{x_emoji} It appears that you have been caught red handed, now you have to pay a fine of {fine}$"
+                embed.description = f"{x_emoji} It appears that you have been caught red handed, now you have to pay a fine of {currency_symbol} {fine}"
                 await ctx.send(embed)
         else:
             embed = discord.Embed(color=embed_red)
