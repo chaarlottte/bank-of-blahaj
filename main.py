@@ -24,6 +24,7 @@ income_delay_in_seconds: int = config.get("income_delay_in_seconds")
 work_delay_in_seconds: int = config.get("work_delay_in_seconds")
 slut_delay_in_seconds: int = config.get("slut_delay_in_seconds")
 crime_delay_in_seconds: int = config.get("crime_delay_in_seconds")
+rob_delay_in_seconds: int = config.get("rob_delay_in_seconds")
 role_income_list: dict = config.get("role_income")
 
 load_dotenv()
@@ -249,6 +250,54 @@ async def crime_command(ctx: Context):
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
         embed.description = f"{x_emoji} You can commit a crime again <t:{round((user.last_crimed + crime_delay) / 1000)}:R>."
         await ctx.send(embed=embed)
+
+@bot.command(name="rob")
+async def rob_command(ctx: Context, member: discord.Member):
+    user = database.get_user(ctx.author._user)
+    to_rob = database.get_user(member._user)
+    if user.passive == 1:
+        embed = discord.Embed(title="Error!", color=embed_red)
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+        embed.description = f"{x_emoji} You are in passive mode and cannot rob!"
+        await ctx.send(embed)
+    else:
+        now = round(time.time() * 1000)
+        rob_delay = rob_delay_in_seconds * 1000
+        
+        if now - user.last_robbed >= rob_delay:
+            success = random.random() > 0.65 # 65% chance of failure
+
+            if success:
+                if to_rob.cash <= 0:
+                    embed = discord.Embed(title="Whoops!", color=embed_red)
+                    embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+                    embed.description = f"You tried to rob a brokie! Try someone else (or not)"
+                    await ctx.send(embed)
+                else:
+                    payout = random.randint(1, round(to_rob.cash * 0.40)) # Can steal 1$ to 40% of the users cash
+
+                    user = database.add_to_user_balance(user, payout)
+                    to_rob = database.deduct_user_balance(to_rob, payout)
+
+                    embed = discord.Embed(title="Success!", color=embed_green)
+                    embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+                    embed.description = f"{check_emoji} Wow! You just robbed <@{member._user.id}> blind and got {currency_symbol} {payout}! Hope you're happy..."
+                    await ctx.send(embed)
+            else:
+                fine = random.randint(1, round(user.cash * 0.20)) # Fine is 1$ to 20% of the users cash
+                if fine < user.cash:
+                    user = database.deduct_user_balance(user, fine)
+
+                embed = discord.Embed(title="Oh great heavens!", color=embed_red)
+                embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+                embed.description = f"{x_emoji} It appears that you have been caught red handed, now you have to pay a fine of {currency_symbol} {fine}"
+                await ctx.send(embed)
+        else:
+            embed = discord.Embed(color=embed_red)
+            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+            embed.description = f"{x_emoji} You can rob again <t:{round((user.last_robbed + rob_delay) / 1000)}:R>."
+            await ctx.send(embed=embed)
+    
 
 @bot.command(name="work")
 async def work(ctx: Context):
