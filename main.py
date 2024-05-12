@@ -70,13 +70,11 @@ async def on_reaction_add(reaction: discord.Reaction, user: discord.User):
         )
 
         payer_bank = payer.bank > payer.cash
-
         payer = database.add_to_user_balance(
             user=payer,
             amount=-1,
             direct_to_bank=payer_bank
         )
-
         payee = database.add_to_user_balance(
             user=payee,
             amount=1,
@@ -470,5 +468,58 @@ async def create_user_item(ctx: Context, item_name: str, item_price: int, *, ite
     embed.add_field(name="Price:", value=f"{currency_symbol} {item.price}")
     embed.add_field(name="Creator:", value=f"<@{item.creator_user.id}>")
     await ctx.send(embed=embed)
+
+@bot.command(name="coinflip")
+async def coinflip(ctx: Context, guess_str: str, amnt_str: str, *, args = None):
+    user = database.get_user(ctx.author._user)
+
+    match amnt_str:
+        case "all":
+            amount = user.cash
+        case "half":
+            amount = int(user.cash / 2)
+        case _:
+            if amnt_str.isnumeric():
+                amount = int(amnt_str)
+    
+    print(guess_str)
+
+    if guess_str != "heads" and guess_str != "tails":
+        embed = discord.Embed(color=embed_red)
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+        embed.description = f"{x_emoji} You must choose either heads or tails!"
+        await ctx.send(embed=embed)
+        return
+            
+    if amount <= 0:
+        embed = discord.Embed(color=embed_red)
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+        embed.description = f"{x_emoji} You must pay at least {currency_symbol} 0!"
+        await ctx.send(embed=embed)
+        return
+
+    if user.cash >= amount:
+        coinflip = random.choice(["heads", "tails"])
+
+        if coinflip == guess_str.lower():
+            database.add_to_user_balance(user, amount)
+            database.add_to_user_balance(user, amount * -1)
+            embed = discord.Embed(color=embed_green)
+            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+            embed.description = f"{check_emoji} The coin landed on **{coinflip}** and you won {currency_symbol} {amount}!"
+            await ctx.send(embed=embed)
+        else:
+            database.add_to_user_balance(user, amount * -1)
+            embed = discord.Embed(color=embed_red)
+            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+            embed.description = f"{x_emoji} The coin landed on **{coinflip}** and you lost {currency_symbol} {amount}!"
+            await ctx.send(embed=embed)
+
+        
+    else:
+        embed = discord.Embed(color=embed_red)
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+        embed.description = f"{x_emoji} You don't have enough {currency_symbol} for that!"
+        await ctx.send(embed=embed)
 
 bot.run(bot_token)
