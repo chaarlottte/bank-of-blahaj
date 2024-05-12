@@ -7,6 +7,7 @@
     "work_delay_in_seconds": 1,
     "slut_delay_in_seconds": 1,
     "crime_delay_in_seconds": 1,
+    "rob_delay_in_seconds": 60,
     "currency_symbol": "<:blahajcoin:1129976643063132230>",
     "role_income": {
         "1067877237162004501": 10000,
